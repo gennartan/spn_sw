@@ -1,0 +1,129 @@
+#-----------------------------------------------------------
+# Vivado v2019.1 (64-bit)
+# SW Build 2552052 on Fri May 24 14:47:09 MDT 2019
+# IP Build 2548770 on Fri May 24 18:01:18 MDT 2019
+# Start of session at: Tue Apr  7 12:55:50 2020
+# Process ID: 6555
+# Current directory: /home/gennart/Documents/MAI/Thesis/spn_sw/build
+# Command line: vivado
+# Log file: /home/gennart/Documents/MAI/Thesis/spn_sw/build/vivado.log
+# Journal file: /home/gennart/Documents/MAI/Thesis/spn_sw/build/vivado.jou
+#-----------------------------------------------------------
+start_gui
+open_project /home/gennart/Documents/MAI/Thesis/posit_spn/spn_thesis/spn_thesis.xpr
+update_compile_order -fileset sources_1
+open_bd_design {/home/gennart/Documents/MAI/Thesis/posit_spn/spn_thesis/spn_thesis.srcs/sources_1/bd/design_SPN/design_SPN.bd}
+startgroup
+create_bd_cell -type ip -vlnv xilinx.com:ip:axi_fifo_mm_s:4.2 axi_fifo_mm_s_0
+endgroup
+delete_bd_objs [get_bd_cells axi_fifo_mm_s_0]
+startgroup
+create_bd_cell -type ip -vlnv xilinx.com:ip:axis_data_fifo:2.0 axis_data_fifo_0
+endgroup
+set_property location {1 71 -314} [get_bd_cells axis_data_fifo_0]
+startgroup
+create_bd_cell -type ip -vlnv xilinx.com:ip:axi_data_fifo:2.1 axi_data_fifo_0
+endgroup
+set_property location {1 32 -448} [get_bd_cells axi_data_fifo_0]
+startgroup
+create_bd_cell -type ip -vlnv xilinx.com:ip:fifo_generator:13.2 fifo_generator_0
+endgroup
+delete_bd_objs [get_bd_cells fifo_generator_0]
+delete_bd_objs [get_bd_cells axi_data_fifo_0]
+delete_bd_objs [get_bd_cells axis_data_fifo_0]
+startgroup
+create_bd_cell -type ip -vlnv xilinx.com:ip:axi_vfifo_ctrl:2.0 axi_vfifo_ctrl_0
+endgroup
+set_property location {1 98 -552} [get_bd_cells axi_vfifo_ctrl_0]
+delete_bd_objs [get_bd_cells axi_vfifo_ctrl_0]
+startgroup
+create_bd_cell -type ip -vlnv xilinx.com:ip:axi_fifo_mm_s:4.2 axi_fifo_mm_s_0
+endgroup
+delete_bd_objs [get_bd_cells axi_fifo_mm_s_0]
+startgroup
+create_bd_cell -type ip -vlnv xilinx.com:ip:axi_data_fifo:2.1 axi_data_fifo_0
+endgroup
+set_property location {3 758 -394} [get_bd_cells axi_data_fifo_0]
+regenerate_bd_layout
+delete_bd_objs [get_bd_cells axi_data_fifo_0]
+startgroup
+create_bd_cell -type ip -vlnv xilinx.com:ip:fifo_generator:13.2 fifo_generator_0
+endgroup
+set_property -dict [list CONFIG.INTERFACE_TYPE {AXI_STREAM} CONFIG.Reset_Type {Asynchronous_Reset} CONFIG.Full_Flags_Reset_Value {1} CONFIG.PROTOCOL {AXI4} CONFIG.Clock_Type_AXI {Common_Clock} CONFIG.FIFO_Implementation_wach {Common_Clock_Distributed_RAM} CONFIG.Full_Threshold_Assert_Value_wach {15} CONFIG.Empty_Threshold_Assert_Value_wach {14} CONFIG.FIFO_Implementation_wdch {Common_Clock_Block_RAM} CONFIG.Empty_Threshold_Assert_Value_wdch {1022} CONFIG.FIFO_Implementation_wrch {Common_Clock_Distributed_RAM} CONFIG.Full_Threshold_Assert_Value_wrch {15} CONFIG.Empty_Threshold_Assert_Value_wrch {14} CONFIG.FIFO_Implementation_rach {Common_Clock_Distributed_RAM} CONFIG.Full_Threshold_Assert_Value_rach {15} CONFIG.Empty_Threshold_Assert_Value_rach {14} CONFIG.FIFO_Implementation_rdch {Common_Clock_Block_RAM} CONFIG.Empty_Threshold_Assert_Value_rdch {1022} CONFIG.FIFO_Implementation_axis {Common_Clock_Block_RAM} CONFIG.Empty_Threshold_Assert_Value_axis {1022} CONFIG.Enable_Safety_Circuit {true}] [get_bd_cells fifo_generator_0]
+set_property location {2.5 899 199} [get_bd_cells fifo_generator_0]
+set_property location {2.5 1165 202} [get_bd_cells my_spn_0]
+apply_bd_automation -rule xilinx.com:bd_rule:axi4_s2mm -config {Dest_Intf "/my_spn_0/S00_AXI" Bridge_IP "New AXI DMA (High/Medium frequency transfer)" Conn_S_AXIS "1" Clk_Stream "Auto" Clk_MM "Auto" }  [get_bd_intf_pins fifo_generator_0/M_AXIS]
+apply_bd_automation -rule xilinx.com:bd_rule:axi4_s2mm -config {Dest_Intf "/my_spn_0/S00_AXI" Bridge_IP "New AXI DMA (High/Medium frequency transfer)" Conn_S_AXIS "1" Clk_Stream "Auto" Clk_MM "Auto" }  [get_bd_intf_pins fifo_generator_0/M_AXIS]
+apply_bd_automation -rule xilinx.com:bd_rule:axi4_s2mm -config {Dest_Intf "/processing_system7_0/M_AXI_GP0" Bridge_IP "New AXI-Stream FIFO (Medium/Low frequency transfer)" Conn_M_AXIS "1" Clk_Stream "Auto" Clk_MM "Auto" }  [get_bd_intf_pins fifo_generator_0/S_AXIS]
+set_property -dict [list CONFIG.INTERFACE_TYPE {AXI_MEMORY_MAPPED}] [get_bd_cells fifo_generator_0]
+connect_bd_intf_net [get_bd_intf_pins fifo_generator_0/S_AXI] [get_bd_intf_pins processing_system7_0/M_AXI_GP0]
+create_peripheral user.org user myip 1.0 -dir /home/gennart/Documents/MAI/Thesis/posit_spn/ip_repo
+add_peripheral_interface S00_AXIS -interface_mode slave -axi_type stream [ipx::find_open_core user.org:user:myip:1.0]
+generate_peripheral -force [ipx::find_open_core user.org:user:myip:1.0]
+write_peripheral [ipx::find_open_core user.org:user:myip:1.0]
+set_property  ip_repo_paths  {/home/gennart/Documents/MAI/Thesis/posit_spn/ip_repo/myip_1.0 /home/gennart/Documents/MAI/Thesis/posit_spn/ip_repo/SPN_Mnist_1.0 /home/gennart/Documents/MAI/Thesis/posit_spn/ip_repo/my_spn_1.0 /home/gennart/Documents/MAI/Thesis/posit_spn/ip_repo/myip_1.0 /home/gennart/Documents/MAI/Thesis/posit_spn/ip_repo/SPN_IP_1.0 /home/gennart/Documents/MAI/Thesis/posit_spn/ip_repo/myip_1.0 /home/gennart/Documents/MAI/Thesis/posit_spn/ip_repo/My_SPN_Core_AXI_1.0 /home/gennart/Documents/MAI/Thesis/posit_spn} [current_project]
+update_ip_catalog -rebuild
+startgroup
+create_bd_cell -type ip -vlnv user.org:user:myip:1.0 myip_0
+endgroup
+set_property location {3 882 -19} [get_bd_cells my_spn_0]
+set_property location {3 838 191} [get_bd_cells myip_0]
+apply_bd_automation -rule xilinx.com:bd_rule:axi4_s2mm -config {Dest_Intf "/myip_0/S00_AXIS" Bridge_IP "New AXI-Stream FIFO (Medium/Low frequency transfer)" Clk_Stream "Auto" Clk_MM "Auto" }  [get_bd_intf_pins fifo_generator_0/M_AXI]
+startgroup
+set_property -dict [list CONFIG.INTERFACE_TYPE {AXI_STREAM}] [get_bd_cells fifo_generator_0]
+delete_bd_objs [get_bd_intf_nets processing_system7_0_M_AXI_GP0]
+endgroup
+connect_bd_intf_net [get_bd_intf_pins fifo_generator_0/M_AXIS] [get_bd_intf_pins myip_0/S00_AXIS]
+startgroup
+set_property -dict [list CONFIG.PCW_USE_M_AXI_GP0 {0} CONFIG.PCW_USE_S_AXI_GP0 {1}] [get_bd_cells processing_system7_0]
+endgroup
+startgroup
+set_property -dict [list CONFIG.PCW_USE_S_AXI_GP0 {0}] [get_bd_cells processing_system7_0]
+endgroup
+startgroup
+set_property -dict [list CONFIG.PCW_USE_S_AXI_GP1 {1}] [get_bd_cells processing_system7_0]
+endgroup
+delete_bd_objs [get_bd_intf_nets processing_system7_0_DDR] [get_bd_intf_nets processing_system7_0_FIXED_IO] [get_bd_cells processing_system7_0]
+startgroup
+create_bd_cell -type ip -vlnv xilinx.com:ip:processing_system7:5.5 processing_system7_0
+endgroup
+set_property location {1 193 207} [get_bd_cells processing_system7_0]
+apply_bd_automation -rule xilinx.com:bd_rule:axi4 -config { Clk_master {Auto} Clk_slave {Auto} Clk_xbar {Auto} Master {/axi_dma/M_AXI_S2MM} Slave {/my_spn_0/S00_AXI} intc_ip {New AXI Interconnect} master_apm {0}}  [get_bd_intf_pins my_spn_0/S00_AXI]
+apply_bd_automation -rule xilinx.com:bd_rule:axi4_s2mm -config {Dest_Intf "/fifo_generator_0/S_AXIS" Bridge_IP "New AXI-Stream FIFO (Medium/Low frequency transfer)" Clk_Stream "Auto" Clk_MM "Auto" }  [get_bd_intf_pins processing_system7_0/M_AXI_GP0]
+startgroup
+set_property -dict [list CONFIG.TDATA_NUM_BYTES {4} CONFIG.TSTRB_WIDTH {4} CONFIG.TKEEP_WIDTH {4}] [get_bd_cells fifo_generator_0]
+endgroup
+apply_bd_automation -rule xilinx.com:bd_rule:axi4_s2mm -config {Dest_Intf "/fifo_generator_0/S_AXIS" Bridge_IP "New AXI-Stream FIFO (Medium/Low frequency transfer)" Clk_Stream "Auto" Clk_MM "Auto" }  [get_bd_intf_pins processing_system7_0/M_AXI_GP0]
+regenerate_bd_layout
+apply_bd_automation -rule xilinx.com:bd_rule:processing_system7 -config {make_external "FIXED_IO, DDR" apply_board_preset "1" Master "Disable" Slave "Disable" }  [get_bd_cells processing_system7_0]
+delete_bd_objs [get_bd_intf_ports DDR] [get_bd_intf_ports FIXED_IO]
+ipx::edit_ip_in_project -upgrade true -name my_spn_v1_0_project -directory /home/gennart/Documents/MAI/Thesis/posit_spn/spn_thesis/spn_thesis.tmp/my_spn_v1_0_project /home/gennart/Documents/MAI/Thesis/posit_spn/ip_repo/my_spn_1.0/component.xml
+update_compile_order -fileset sources_1
+create_ip -name axis_data_fifo -vendor xilinx.com -library ip -version 2.0 -module_name axis_data_fifo_0 -dir /home/gennart/Documents/MAI/Thesis/posit_spn/ip_repo/my_spn_1.0/src
+generate_target {instantiation_template} [get_files /home/gennart/Documents/MAI/Thesis/posit_spn/ip_repo/my_spn_1.0/src/axis_data_fifo_0/axis_data_fifo_0.xci]
+update_compile_order -fileset sources_1
+create_ip -name axis_data_fifo -vendor xilinx.com -library ip -version 2.0 -module_name axis_data_fifo_1 -dir /home/gennart/Documents/MAI/Thesis/posit_spn/ip_repo/my_spn_1.0/src
+set_property -dict [list CONFIG.TDATA_NUM_BYTES {4}] [get_ips axis_data_fifo_1]
+generate_target {instantiation_template} [get_files /home/gennart/Documents/MAI/Thesis/posit_spn/ip_repo/my_spn_1.0/src/axis_data_fifo_1/axis_data_fifo_1.xci]
+update_compile_order -fileset sources_1
+generate_target all [get_files  /home/gennart/Documents/MAI/Thesis/posit_spn/ip_repo/my_spn_1.0/src/axis_data_fifo_1/axis_data_fifo_1.xci]
+catch { config_ip_cache -export [get_ips -all axis_data_fifo_1] }
+export_ip_user_files -of_objects [get_files /home/gennart/Documents/MAI/Thesis/posit_spn/ip_repo/my_spn_1.0/src/axis_data_fifo_1/axis_data_fifo_1.xci] -no_script -sync -force -quiet
+create_ip_run [get_files -of_objects [get_fileset sources_1] /home/gennart/Documents/MAI/Thesis/posit_spn/ip_repo/my_spn_1.0/src/axis_data_fifo_1/axis_data_fifo_1.xci]
+launch_runs -jobs 8 axis_data_fifo_1_synth_1
+export_simulation -of_objects [get_files /home/gennart/Documents/MAI/Thesis/posit_spn/ip_repo/my_spn_1.0/src/axis_data_fifo_1/axis_data_fifo_1.xci] -directory /home/gennart/Documents/MAI/Thesis/posit_spn/spn_thesis/spn_thesis.tmp/my_spn_v1_0_project/my_spn_v1_0_project.ip_user_files/sim_scripts -ip_user_files_dir /home/gennart/Documents/MAI/Thesis/posit_spn/spn_thesis/spn_thesis.tmp/my_spn_v1_0_project/my_spn_v1_0_project.ip_user_files -ipstatic_source_dir /home/gennart/Documents/MAI/Thesis/posit_spn/spn_thesis/spn_thesis.tmp/my_spn_v1_0_project/my_spn_v1_0_project.ip_user_files/ipstatic -lib_map_path [list {modelsim=/home/gennart/Documents/MAI/Thesis/posit_spn/spn_thesis/spn_thesis.tmp/my_spn_v1_0_project/my_spn_v1_0_project.cache/compile_simlib/modelsim} {questa=/home/gennart/Documents/MAI/Thesis/posit_spn/spn_thesis/spn_thesis.tmp/my_spn_v1_0_project/my_spn_v1_0_project.cache/compile_simlib/questa} {ies=/home/gennart/Documents/MAI/Thesis/posit_spn/spn_thesis/spn_thesis.tmp/my_spn_v1_0_project/my_spn_v1_0_project.cache/compile_simlib/ies} {xcelium=/home/gennart/Documents/MAI/Thesis/posit_spn/spn_thesis/spn_thesis.tmp/my_spn_v1_0_project/my_spn_v1_0_project.cache/compile_simlib/xcelium} {vcs=/home/gennart/Documents/MAI/Thesis/posit_spn/spn_thesis/spn_thesis.tmp/my_spn_v1_0_project/my_spn_v1_0_project.cache/compile_simlib/vcs} {riviera=/home/gennart/Documents/MAI/Thesis/posit_spn/spn_thesis/spn_thesis.tmp/my_spn_v1_0_project/my_spn_v1_0_project.cache/compile_simlib/riviera}] -use_ip_compiled_libs -force -quiet
+export_ip_user_files -of_objects  [get_files /home/gennart/Documents/MAI/Thesis/posit_spn/ip_repo/my_spn_1.0/src/axis_data_fifo_0/axis_data_fifo_0.xci] -no_script -reset -force -quiet
+remove_files  /home/gennart/Documents/MAI/Thesis/posit_spn/ip_repo/my_spn_1.0/src/axis_data_fifo_0/axis_data_fifo_0.xci
+export_ip_user_files -of_objects  [get_files /home/gennart/Documents/MAI/Thesis/posit_spn/ip_repo/my_spn_1.0/src/axis_data_fifo_1/axis_data_fifo_1.xci] -no_script -reset -force -quiet
+remove_files  -fileset axis_data_fifo_1 /home/gennart/Documents/MAI/Thesis/posit_spn/ip_repo/my_spn_1.0/src/axis_data_fifo_1/axis_data_fifo_1.xci
+create_ip -name axis_data_fifo -vendor xilinx.com -library ip -version 2.0 -module_name axis_data_fifo_0 -dir /home/gennart/Documents/MAI/Thesis/posit_spn/ip_repo/my_spn_1.0/src
+set_property -dict [list CONFIG.TDATA_NUM_BYTES {4}] [get_ips axis_data_fifo_0]
+generate_target {instantiation_template} [get_files /home/gennart/Documents/MAI/Thesis/posit_spn/ip_repo/my_spn_1.0/src/axis_data_fifo_0_1/axis_data_fifo_0.xci]
+update_compile_order -fileset sources_1
+generate_target all [get_files  /home/gennart/Documents/MAI/Thesis/posit_spn/ip_repo/my_spn_1.0/src/axis_data_fifo_0_1/axis_data_fifo_0.xci]
+catch { config_ip_cache -export [get_ips -all axis_data_fifo_0] }
+export_ip_user_files -of_objects [get_files /home/gennart/Documents/MAI/Thesis/posit_spn/ip_repo/my_spn_1.0/src/axis_data_fifo_0_1/axis_data_fifo_0.xci] -no_script -sync -force -quiet
+create_ip_run [get_files -of_objects [get_fileset sources_1] /home/gennart/Documents/MAI/Thesis/posit_spn/ip_repo/my_spn_1.0/src/axis_data_fifo_0_1/axis_data_fifo_0.xci]
+launch_runs -jobs 8 axis_data_fifo_0_synth_1
+export_simulation -of_objects [get_files /home/gennart/Documents/MAI/Thesis/posit_spn/ip_repo/my_spn_1.0/src/axis_data_fifo_0_1/axis_data_fifo_0.xci] -directory /home/gennart/Documents/MAI/Thesis/posit_spn/spn_thesis/spn_thesis.tmp/my_spn_v1_0_project/my_spn_v1_0_project.ip_user_files/sim_scripts -ip_user_files_dir /home/gennart/Documents/MAI/Thesis/posit_spn/spn_thesis/spn_thesis.tmp/my_spn_v1_0_project/my_spn_v1_0_project.ip_user_files -ipstatic_source_dir /home/gennart/Documents/MAI/Thesis/posit_spn/spn_thesis/spn_thesis.tmp/my_spn_v1_0_project/my_spn_v1_0_project.ip_user_files/ipstatic -lib_map_path [list {modelsim=/home/gennart/Documents/MAI/Thesis/posit_spn/spn_thesis/spn_thesis.tmp/my_spn_v1_0_project/my_spn_v1_0_project.cache/compile_simlib/modelsim} {questa=/home/gennart/Documents/MAI/Thesis/posit_spn/spn_thesis/spn_thesis.tmp/my_spn_v1_0_project/my_spn_v1_0_project.cache/compile_simlib/questa} {ies=/home/gennart/Documents/MAI/Thesis/posit_spn/spn_thesis/spn_thesis.tmp/my_spn_v1_0_project/my_spn_v1_0_project.cache/compile_simlib/ies} {xcelium=/home/gennart/Documents/MAI/Thesis/posit_spn/spn_thesis/spn_thesis.tmp/my_spn_v1_0_project/my_spn_v1_0_project.cache/compile_simlib/xcelium} {vcs=/home/gennart/Documents/MAI/Thesis/posit_spn/spn_thesis/spn_thesis.tmp/my_spn_v1_0_project/my_spn_v1_0_project.cache/compile_simlib/vcs} {riviera=/home/gennart/Documents/MAI/Thesis/posit_spn/spn_thesis/spn_thesis.tmp/my_spn_v1_0_project/my_spn_v1_0_project.cache/compile_simlib/riviera}] -use_ip_compiled_libs -force -quiet
+update_compile_order -fileset sources_1

@@ -1,0 +1,24 @@
+#IncludeRegexLine: ^[ 	]*[#%][ 	]*(include|import)[ 	]*[<"]([^">]+)([">])
+
+#IncludeRegexScan: ^.*$
+
+#IncludeRegexComplain: ^$
+
+#IncludeRegexTransform: 
+
+../bfp/lib/posit.h
+posit_types.h
+../bfp/lib/posit_types.h
+
+../bfp/lib/posit_types.h
+stdint.h
+-
+stdbool.h
+-
+
+/home/gennart/Documents/MAI/Thesis/spn_sw/bfp/main.cpp
+posit.h
+/home/gennart/Documents/MAI/Thesis/spn_sw/bfp/posit.h
+cstdio
+-
+

@@ -1,0 +1,28 @@
+#IncludeRegexLine: ^[ 	]*#[ 	]*(include|import)[ 	]*[<"]([^">]+)([">])
+
+#IncludeRegexScan: ^.*$
+
+#IncludeRegexComplain: ^$
+
+#IncludeRegexTransform: 
+
+/home/gennart/Documents/MAI/Thesis/spn_sw/src/posit.cpp
+posit.h
+/home/gennart/Documents/MAI/Thesis/spn_sw/src/posit.h
+util.h
+/home/gennart/Documents/MAI/Thesis/spn_sw/src/util.h
+pack.h
+/home/gennart/Documents/MAI/Thesis/spn_sw/src/pack.h
+op1.h
+/home/gennart/Documents/MAI/Thesis/spn_sw/src/op1.h
+op2.h
+/home/gennart/Documents/MAI/Thesis/spn_sw/src/op2.h
+cstdio
+-
+cmath
+-
+
+/home/gennart/Documents/MAI/Thesis/spn_sw/src/util.h
+posit_types.h
+/home/gennart/Documents/MAI/Thesis/spn_sw/src/posit_types.h
+

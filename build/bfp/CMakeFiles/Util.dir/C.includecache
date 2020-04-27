@@ -1,0 +1,22 @@
+#IncludeRegexLine: ^[ 	]*[#%][ 	]*(include|import)[ 	]*[<"]([^">]+)([">])
+
+#IncludeRegexScan: ^.*$
+
+#IncludeRegexComplain: ^$
+
+#IncludeRegexTransform: 
+
+/home/gennart/Documents/MAI/Thesis/spn_sw/bfp/lib/posit_types.h
+stdint.h
+-
+stdbool.h
+-
+
+/home/gennart/Documents/MAI/Thesis/spn_sw/bfp/lib/util.c
+util.h
+/home/gennart/Documents/MAI/Thesis/spn_sw/bfp/lib/util.h
+
+/home/gennart/Documents/MAI/Thesis/spn_sw/bfp/lib/util.h
+posit_types.h
+/home/gennart/Documents/MAI/Thesis/spn_sw/bfp/lib/posit_types.h
+

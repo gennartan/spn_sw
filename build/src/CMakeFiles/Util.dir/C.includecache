@@ -1,0 +1,16 @@
+#IncludeRegexLine: ^[ 	]*#[ 	]*(include|import)[ 	]*[<"]([^">]+)([">])
+
+#IncludeRegexScan: ^.*$
+
+#IncludeRegexComplain: ^$
+
+#IncludeRegexTransform: 
+
+/home/gennart/Documents/MAI/Thesis/spn_sw/src/util.c
+util.h
+/home/gennart/Documents/MAI/Thesis/spn_sw/src/util.h
+
+/home/gennart/Documents/MAI/Thesis/spn_sw/src/util.h
+posit_types.h
+/home/gennart/Documents/MAI/Thesis/spn_sw/src/posit_types.h
+

@@ -1,0 +1,15 @@
+/home/gennart/Documents/MAI/Thesis/spn_sw/build/CMakeFiles/rebuild_cache.dir
+/home/gennart/Documents/MAI/Thesis/spn_sw/build/CMakeFiles/edit_cache.dir
+/home/gennart/Documents/MAI/Thesis/spn_sw/build/CMakeFiles/exe.dir
+/home/gennart/Documents/MAI/Thesis/spn_sw/build/src/CMakeFiles/rebuild_cache.dir
+/home/gennart/Documents/MAI/Thesis/spn_sw/build/src/CMakeFiles/edit_cache.dir
+/home/gennart/Documents/MAI/Thesis/spn_sw/build/src/CMakeFiles/SPN.dir
+/home/gennart/Documents/MAI/Thesis/spn_sw/build/src/CMakeFiles/Utils.dir
+/home/gennart/Documents/MAI/Thesis/spn_sw/build/bfp/CMakeFiles/rebuild_cache.dir
+/home/gennart/Documents/MAI/Thesis/spn_sw/build/bfp/CMakeFiles/OP2.dir
+/home/gennart/Documents/MAI/Thesis/spn_sw/build/bfp/CMakeFiles/Pack.dir
+/home/gennart/Documents/MAI/Thesis/spn_sw/build/bfp/CMakeFiles/bfp.dir
+/home/gennart/Documents/MAI/Thesis/spn_sw/build/bfp/CMakeFiles/OP1.dir
+/home/gennart/Documents/MAI/Thesis/spn_sw/build/bfp/CMakeFiles/Util.dir
+/home/gennart/Documents/MAI/Thesis/spn_sw/build/bfp/CMakeFiles/edit_cache.dir
+/home/gennart/Documents/MAI/Thesis/spn_sw/build/bfp/CMakeFiles/Posit.dir
