@@ -17,6 +17,7 @@ typedef struct err_t_struct{
 } err_t;
 
 typedef struct cost_t_struct{
+	num_size_t size;
 	double max_node_numbers; // A node is a sum or a product
 	double multiplier_speed; // min period to run on FPGA
 	double min_rel_error, max_rel_error; // relative error

@@ -1,2 +1,0 @@
-/usr/bin/ar qc libPack.a  CMakeFiles/Pack.dir/lib/pack.c.o
-/usr/bin/ranlib libPack.a

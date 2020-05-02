@@ -5,8 +5,10 @@
 #include <stdlib.h>
 #include <iostream>
 #include <queue>
+#include <cstdlib>
 #include <math.h>
 #include "posit.h"
+#include "myFloat.h"
 #include "utils.h"
 
 #define MAXLINE 100
@@ -57,7 +59,9 @@ public:
 	void set_product(int id, int *ids, int n_children);
 	void set_weight(int id, int id_1, double weight);
 
-	double compute(int **literals, int n_lit);
+	double compute_exact(int **literals, int n_lit);
+	Posit compute_real_posit(int **literals, int n_lit, num_size_t size);
+	myFloat compute_real_float(int **literals, int n_lit, num_size_t size);
 	err_t compute_err(Number_representation *repr, num_size_t size, int** literals, int n_lit);
 	double compute_area(Number_representation *repr, num_size_t size);
 };
@@ -74,12 +78,15 @@ public:
 
 	void print();
 	Node* search_node(int id);
-	double compute(int** literals);
+	double compute_exact(int** literals);
+	Posit compute_real_posit(int** literals,  num_size_t size);
+	myFloat compute_real_float(int **literals, num_size_t size);
 	err_t compute_err(Number_representation *repr, num_size_t size);
 	double compute_area(Number_representation *repr, num_size_t size);
 	int **create_literals();
 	void delete_literals(int** literals);
 	int next_literals(int **literals);
+	int random_literals(int **literals);
 	void print_literals(FILE* f, int** literals);
 
 	int isDeterministic();

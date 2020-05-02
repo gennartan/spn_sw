@@ -101,12 +101,12 @@ void Node::set_weight(int id, int id_1, double weight){
 	this->children = (Node**) malloc(sizeof(Node*));
 }
 
-double Node::compute(int **literals, int n_lit){
+double Node::compute_exact(int **literals, int n_lit){
 	switch(this->type){
 		case(S):{
 			double result = 0.0;
 			for(int i=0;i<this->n_children;i++){
-				result += this->children[i]->compute(literals, n_lit);
+				result += this->children[i]->compute_exact(literals, n_lit);
 			}
 			// cout << "Intermediate sum result " << result << endl;
 			return result;
@@ -115,15 +115,14 @@ double Node::compute(int **literals, int n_lit){
 		case(P):{
 			double result = 1.0;
 			for(int i=0;i<this->n_children;i++){
-				result *= this->children[i]->compute(literals, n_lit);
+				result *= this->children[i]->compute_exact(literals, n_lit);
 			}
 			// cout << "Intermediate product result " << result << endl;
 			return result;
 		}
 		break;
 		case(W):{
-
-			double result = this->weight * this->children[0]->compute(literals, n_lit);
+			double result = this->weight * this->children[0]->compute_exact(literals, n_lit);
 			// cout << "Intermediate weight result " << result << endl;
 			return result;
 		}
@@ -142,6 +141,103 @@ double Node::compute(int **literals, int n_lit){
 	return -1;
 }
 
+Posit Node::compute_real_posit(int **literals, int n_lit, num_size_t size){
+	switch(this->type){
+		case(S):{
+			Posit result = Posit(size.nBits+1, size.es);
+			result.set(0.0);
+			for(int i=0;i<this->n_children;i++){
+				result = result + this->children[i]->compute_real_posit(literals, n_lit, size);
+			}
+			// cout << "Intermediate sum result " << result << endl;
+			return result;
+		}
+		break;
+		case(P):{
+			Posit result = Posit(size.nBits+1, size.es);
+			result.set(1.0);
+			for(int i=0;i<this->n_children;i++){
+				result = result * this->children[i]->compute_real_posit(literals, n_lit, size);
+			}
+			return result;
+		}
+		break;
+		case(W):{
+			Posit result = Posit(size.nBits+1, size.es);
+			Posit weight = Posit(size.nBits+1, size.es);
+			weight.set(this->weight);
+			result = weight * this->children[0]->compute_real_posit(literals, n_lit, size);
+			return result;
+		}
+		break;
+		case(L):{
+			Posit result = Posit(size.nBits+1, size.es);
+			int sign = this->literal > 0;
+			int nbr = sign ? this->literal : -this->literal;
+			// cout << sign << nbr << endl;
+			// cout << "Integer value: " << literals[nbr-1][sign] << endl;
+			result.set(static_cast<double>(literals[nbr-1][sign]));
+			// cout << "Intermediate literal result " << result << endl;
+			return result;
+		}
+		break;
+	}
+	Posit dummy = Posit(size.nBits+1, size.es);
+	dummy.set(-1.0);
+	printf("Dummy error\n");
+	return dummy;
+}
+
+myFloat Node::compute_real_float(int **literals, int n_lit, num_size_t size){
+	switch(this->type){
+		case(S):{
+			myFloat result = myFloat(size.nBits+1, size.es);
+			result.set(0.0);
+			for(int i=0;i<this->n_children;i++){
+				result = result + this->children[i]->compute_real_float(literals, n_lit, size);
+			}
+			// cout << "Intermediate sum result " << result << endl;
+			return result;
+		}
+		break;
+		case(P):{
+			myFloat result = myFloat(size.nBits+1, size.es);
+			result.set(1.0);
+			for(int i=0;i<this->n_children;i++){
+				result = result * this->children[i]->compute_real_float(literals, n_lit, size);
+			}
+			return result;
+		}
+		break;
+		case(W):{
+			myFloat result = myFloat(size.nBits+1, size.es);
+			myFloat weight = myFloat(size.nBits+1, size.es);
+			weight.set(this->weight);
+			result = weight * this->children[0]->compute_real_float(literals, n_lit, size);
+			return result;
+		}
+		break;
+		case(L):{
+			myFloat result = myFloat(size.nBits+1, size.es);
+			int sign = this->literal > 0;
+			int nbr = sign ? this->literal : -this->literal;
+			// cout << sign << nbr << endl;
+			// cout << "Integer value: " << literals[nbr-1][sign] << endl;
+			result.set(static_cast<double>(literals[nbr-1][sign]));
+			// cout << "Intermediate literal result " << result << endl;
+			return result;
+		}
+		break;
+	}
+	myFloat dummy = myFloat(size.nBits+1, size.es);
+	dummy.set(-1.0);
+	printf("Dummy error\n");
+	return dummy;
+}
+
+
+double smallest_weight = 1.0;
+
 err_t Node::compute_err(Number_representation *repr, num_size_t size, int** literals, int n_lit){
 	switch(this->type){
 		case(S):{
@@ -156,16 +252,16 @@ err_t Node::compute_err(Number_representation *repr, num_size_t size, int** lite
 			err_t res = this->children[0]->compute_err(repr, size, literals, n_lit);
 			for(int i=1;i<this->n_children;i++){
 				res = repr->multiplication_error(size, res, this->children[i]->compute_err(repr, size, literals, n_lit));
+				// print_err(res);
 			}
 			return res;
 		}
 		break;
 		case(W):{
-			// if(this->weight < 0.001){
-			// 	printf("Weight : %lf\n", this->weight);
-			// }
+			err_t res;
 			err_t weight = repr->encoding_error(size, this->weight);
-			return repr->multiplication_error(size, weight, this->children[0]->compute_err(repr, size, literals, n_lit));
+			res = repr->multiplication_error(size, weight, this->children[0]->compute_err(repr, size, literals, n_lit));
+			return res;
 		}
 		break;
 		case(L):{
@@ -173,7 +269,9 @@ err_t Node::compute_err(Number_representation *repr, num_size_t size, int** lite
 			int nbr = sign ? this->literal : -this->literal;
 
 			double result = static_cast<double>(literals[nbr-1][sign]);
-			return repr->encoding_error(size, result);
+
+			err_t res = repr->encoding_error(size, result);
+			return res;
 		}
 	}
 	// error
@@ -343,9 +441,18 @@ Node* SPN::search_node(int id){
 	return NULL;
 }
 
-double SPN::compute(int** literals){
-	return this->spn[this->spn_size-1]->compute(literals, this->n_lit);
+double SPN::compute_exact(int** literals){
+	return this->spn[this->spn_size-1]->compute_exact(literals, this->n_lit);
 }
+
+Posit SPN::compute_real_posit(int** literals, num_size_t size){
+	return this->spn[this->spn_size-1]->compute_real_posit(literals, this->n_lit, size);
+}
+
+myFloat SPN::compute_real_float(int **literals, num_size_t size){
+	return this->spn[this->spn_size-1]->compute_real_float(literals, this->n_lit, size);
+}
+
 
 err_t SPN::compute_err(Number_representation *repr, num_size_t size){
 	int **literals = this->create_literals();
@@ -362,6 +469,7 @@ double SPN::compute_area(Number_representation *repr, num_size_t size){
 	for(int i=0;i<this->spn_size;i++){
 		area += this->spn[i]->compute_area(repr, size);
 	}
+	return area;
 }
 
 int** SPN::create_literals(){
@@ -449,6 +557,24 @@ int SPN::next_literals(int** literals){
 	return carry;
 }
 
+int SPN::random_literals(int** literals){
+
+	for(int i=0;i<this->n_lit;i++){
+		int rnd = rand() % 3;
+		if(rnd==0){
+			literals[i][0] = 0;
+			literals[i][1] = 1;
+		}else if(rnd==1){
+			literals[i][0] = 1;
+			literals[i][1] = 0;
+		}else{
+			literals[i][0] = 1;
+			literals[i][1] = 1;
+		}
+	}
+	return 0;
+}
+
 void SPN::print_literals(FILE* f, int** literals){
 	for(int i=0;i<this->n_lit;i++){
 		fprintf(f, "%d %d ", literals[i][0], literals[i][1]);
@@ -467,9 +593,3 @@ int SPN::isDecomposable(){
 int SPN::isSmooth(){
 	return this->spn[this->spn_size-1]->isSmooth;
 }
-
-
-// =============================================================================
-// =============================== META DATA SPN ===============================
-// =============================================================================
-

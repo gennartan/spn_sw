@@ -147,10 +147,13 @@ err_t Float_err::encoding_error(num_size_t size, double val){
 		rel_error = pow(2, -(res.nBits-res.es+1));
 	}
 
-	double max_exp = pow(2, size.es-1);
-	double max_mant = 1;
+	double max_exp = pow(2, pow(2, size.es-1)-1);
+	double max_mant = 2 - pow(2, size.es - size.nBits);
 	double max_float = max_mant*max_exp;
 	double min_float = 1.0 / max_exp;
+
+	// printf("(2 - 2^(%d))* 2^%d\n", size.es-size.nBits, pow(2, size.es)-1);
+	// exit(0);
 	if(val != 0){
 		if(val > max_float || val < min_float){
 			res.out_of_range = 1;
@@ -186,6 +189,9 @@ err_t Float_err::multiplication_error(num_size_t size, err_t f1, err_t f2){
 		rel_error_bound_min = (accumulated_error)*(1+new_error) - 1;
 	}
 
+	//if(min_val == 0 && max_val != 0){
+	//	printf("EROROROROROROR\n");
+	//}
 	res.out_of_range =f1.out_of_range||f2.out_of_range||new_error_f.out_of_range;
 
 	// printf("Multiplication val / error == %lf / %lf\n", max_val, rel_error_bound);

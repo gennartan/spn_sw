@@ -101,7 +101,7 @@ int simple_test(SPN *spn, FILE* f){
 #else
 
 int complete_test(SPN *spn, FILE* f){
-	int nBits[] = {8, 12, 16, 20, 24, 28, 31, 64};
+	int nBits[] = {8, 12, 16, 20, 24, 28, 31};
 	list<int> NBits (nBits, nBits+sizeof(nBits)/sizeof(int));
 
 	int es[] = {0, 2, 4, 6, 8, 10, 11};
@@ -112,6 +112,7 @@ int complete_test(SPN *spn, FILE* f){
 	Float_err Float_repr;
 	list<err_t> float_error;
 
+	// Compute error bound
 	num_size_t size;
 	for(list<int>::iterator nb=NBits.begin(); nb!=NBits.end(); nb++){
 		err_t P_err = err_init(size);
@@ -119,7 +120,7 @@ int complete_test(SPN *spn, FILE* f){
 		err_t F_err = err_init(size);
 		F_err.max_rel_error = INFINITY; F_err.min_rel_error = INFINITY;
 
-		for(list<int>::iterator es=ES.begin(); es!=ES.end() && *es<*nb; es++){
+		for(list<int>::iterator es=ES.begin(); es!=ES.end() && *es<*nb;es++){
 			size.nBits = *nb;
 			size.es = *es;
 
@@ -132,21 +133,69 @@ int complete_test(SPN *spn, FILE* f){
 			}
 
 			err = spn->compute_err(&Float_repr, size);
-			if(err.max_rel_error < F_err.max_rel_error && err.out_of_range==0){
+			if((err.max_rel_error < F_err.max_rel_error && err.out_of_range==0)  || (F_err.max_rel_error==INFINITY && *es==11)){
 				F_err = err;
 			}
 		}
-		if(size.nBits <= 31){
-			posit_error.push_back(P_err);
+		int** literals = spn->create_literals();
+		for(int i=0;i<spn->n_lit;i++){
+			literals[i][0] = 1;
+			literals[i][1] = 1;
 		}
+
+		spn->random_literals(literals);
+
+		double exact_val = spn->compute_exact(literals);
+		// Posit
+		size.nBits = P_err.nBits;
+		size.es = P_err.es;
+		Posit result_posit = spn->compute_real_posit(literals, size);
+		double res_pos = result_posit.getDouble();
+		double exact_pos = exact_val;
+		double error_bound_pos = P_err.max_rel_error;
+		printf("(%d, %d) Posit %lf ~==~ %lf\t diff ==%lf < %lf\n", size.nBits, size.es, exact_pos, res_pos, exact_pos-res_pos, error_bound_pos);
+
+		// Float
+		size.nBits = F_err.nBits;
+		size.es = F_err.es;
+		myFloat result_float = spn->compute_real_float(literals, size);
+		double res_flt = result_float.getDouble();
+		double exact_flt = exact_val;
+		double error_bound_flt = F_err.max_rel_error;
+		printf("(%d, %d) Float %lf ~==~ %lf\t diff ==%lf < %lf\n", size.nBits, size.es, exact_flt, res_flt, exact_flt-res_flt, error_bound_flt);
+
+		posit_error.push_back(P_err);
 		float_error.push_back(F_err);
 	}
 
-	// cout << "NBits : ";
-	// for (list<int>::iterator nb=NBits.begin(); nb!=NBits.end(); nb++){
-	// 	cout << *nb << " ";
-	// }
-	// cout << endl;
+	// Compute Real value with best nBits and best es
+	for(list<err_t>::iterator e=posit_error.begin(); e!=posit_error.end(); e++){
+		size.nBits = e->nBits;
+		size.es = e->es;
+
+		int** literals = spn->create_literals();
+		for(int i=0;i<spn->n_lit;i++){
+			literals[i][0] = 1;
+			literals[i][1] = 1;
+		}
+		Posit result_posit = spn->compute_real_posit(literals, size);
+		printf("(%d, %d) Posit value : %f\n", size.nBits, size.es, result_posit.getDouble());
+
+
+	}
+
+	for(list<err_t>::iterator e=float_error.begin(); e!=float_error.end(); e++){
+		size.nBits = e->nBits;
+		size.es = e->es;
+
+		int **literals = spn->create_literals();
+		for(int i=0;i<spn->n_lit;i++){
+			literals[i][0] = 1;
+			literals[i][1] = 1;
+		}
+		myFloat result_float = spn->compute_real_float(literals, size);
+		printf("(%d, %d) Float value : %f\n", size.nBits, size.es, result_float.getDouble());
+	}
 
 	cout << "Posit " << endl;
 	for(list<err_t>::iterator e=posit_error.begin(); e!=posit_error.end(); e++){
@@ -159,53 +208,6 @@ int complete_test(SPN *spn, FILE* f){
 		print_err(*e);
 	}
 	cout << endl;
-
-
-
-	// // for(int nBits = 8; nBits<=16; nBits+=2){
-	// int Nbits = 8;
-	// double rel_error_posit[] = {INFINITY,INFINITY,INFINITY,INFINITY,INFINITY,INFINITY,INFINITY,INFINITY};
-	// double rel_error_float[] = {INFINITY,INFINITY,INFINITY,INFINITY,INFINITY,INFINITY,INFINITY,INFINITY};
-
-	// int Nexp = 6;
-
-
-	// for(int i=0;i<Nbits;i++){
-	// 	size.nBits = nBits[i];
-	// 	for(int j=0;j<Nexp;j++){
-	// 		size.es = es[j];
-	// 		if(size.nBits <= 31){
-	// 			err_t pos_err = spn->compute_err(&Posit_repr, size);
-	// 			rel_error_posit[i] = fmin(rel_error_posit[i], pos_err.max_rel_error);
-	// 		}
-	// 		err_t float_err = spn->compute_err(&Float_repr, size);
-	// 		rel_error_float[i] = fmin(rel_error_float[i], float_err.max_rel_error);
-	// 	}
-	// }
-
-	// printf("NBITS: ");
-	// for(int i=0;i<Nbits;i++){
-	// 	printf("%d\t", nBits[i]);
-	// }
-	// printf("\nPOSIT: ");
-	// for(int i=0;i<Nbits;i++){
-	// 	if(rel_error_posit[i] < 10){
-	// 		printf("%lf\t", rel_error_posit[i]);
-	// 	}else{
-	// 		printf("INF\t\t");
-	// 	}
-	// }
-	// printf("\nFLOAT: ");
-
-	// for(int i=0;i<Nbits;i++){
-	// 	if(rel_error_float[i] < 10 || nBits[i]==64){
-	// 		printf("%lf\t", rel_error_float[i]);
-	// 	}else{
-	// 		printf("INF(%d)\t\t", nBits[i]);
-	// 	}
-	// }
-	// printf("\n");
-
 
 	return 0;
 }

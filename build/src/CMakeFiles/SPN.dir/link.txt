@@ -1,2 +1,0 @@
-/usr/bin/ar qc libSPN.a  CMakeFiles/SPN.dir/spn.cpp.o
-/usr/bin/ranlib libSPN.a
