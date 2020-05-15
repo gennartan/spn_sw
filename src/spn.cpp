@@ -304,6 +304,9 @@ SPN::SPN(const char* filename){
 	this->spn = NULL;
 	this->spn_size = 0;
 	this->n_lit = 0;
+	this->n_multiplier = 0;
+	this->n_adder = 0;
+	this->n_node = 0;
 	FILE* f = fopen(filename, "r");
 	if(f==NULL){
 		cerr << "Error opening file: " << filename << endl;
@@ -416,6 +419,22 @@ SPN::SPN(const char* filename){
 			}
 		}
 	}
+
+	// Count adder and multiplier
+	this->n_adder = 0;
+	this->n_multiplier = 0;
+	this->n_node = 0; // every node except literal
+	for(int i=0;i<this->spn_size;i++){
+		if(this->spn[i]->type == S){
+			this->n_adder++;
+		}else if(this->spn[i]->type==P || this->spn[i]->type==W){
+			this->n_multiplier++;
+		}
+
+		if(this->spn[i]->type != L){
+			this->n_node++;
+		}
+	}
 }
 
 SPN::~SPN(){
@@ -461,6 +480,7 @@ err_t SPN::compute_err(Number_representation *repr, num_size_t size){
 		literals[i][1] = 1;
 	}
 	err_t res = this->spn[this->spn_size-1]->compute_err(repr, size, literals, this->n_lit);
+	this->delete_literals(literals);
 	return res;
 }
 
@@ -470,6 +490,42 @@ double SPN::compute_area(Number_representation *repr, num_size_t size){
 		area += this->spn[i]->compute_area(repr, size);
 	}
 	return area;
+}
+
+utilization_t SPN::compute_utilization(Number_representation *repr, num_size_t size){
+	utilization_t ut;
+
+	int n_adder=0;
+	int n_multiplier=0;
+	for(int i=0;i<this->spn_size;i++){
+		utilization_t node_ut;
+		if(this->spn[i]->type == S){
+			node_ut = repr->adder_utilization(size);
+			n_adder++;
+		}else if(this->spn[i]->type == P | this->spn[i]->type == W){
+			node_ut = repr->multiplier_utilization(size);
+			n_multiplier++;
+		}
+		ut.nLUT += node_ut.nLUT;
+		ut.nMULT += node_ut.nMULT;
+		ut.nMUXFX += node_ut.nMUXFX;
+	}
+
+	// printf("N_ADDER      : %d\n", n_adder);
+	// printf("N_MULTIPLIER : %d\n", n_multiplier);
+	return ut;
+}
+
+void SPN::report_utilization(Number_representation *repr, num_size_t size){
+	utilization_t ut = this->compute_utilization(repr, size);
+
+	printf("==========================================\n");
+	printf("Utilization report (%d bits) : \n", size.nBits);
+	printf("==========================================\n");
+	printf("LUTS : %d / 66500\n", ut.nLUT);
+	printf("MULT : %d\n", ut.nMULT);
+	printf("MUXF : %d\n", ut.nMUXFX);
+	printf("MULT + MUXF : %d / 220\n", ut.nMULT + ut.nMUXFX);
 }
 
 int** SPN::create_literals(){

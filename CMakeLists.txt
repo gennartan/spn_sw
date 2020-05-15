@@ -7,6 +7,7 @@ project(Tutorial VERSION 1.0)
 set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
 set(CMAKE_CXX_STACK_SIZE "20000000")
+set(CMAKE_CXX_FLAGS "-std=c++17 -lstdc++fs" )
 
 add_subdirectory(src)
 add_subdirectory(bfp)

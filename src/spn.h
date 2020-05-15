@@ -73,6 +73,10 @@ public:
 	int spn_size;
 	int n_lit;
 
+	int n_adder; // number of adder node
+	int n_multiplier; // number of multiplier node
+	int n_node; // number of node that are not literals
+
 	SPN(const char* filename);
 	~SPN();
 
@@ -83,6 +87,8 @@ public:
 	myFloat compute_real_float(int **literals, num_size_t size);
 	err_t compute_err(Number_representation *repr, num_size_t size);
 	double compute_area(Number_representation *repr, num_size_t size);
+	utilization_t compute_utilization(Number_representation *repr, num_size_t size);
+	void report_utilization(Number_representation *repr, num_size_t size);
 	int **create_literals();
 	void delete_literals(int** literals);
 	int next_literals(int **literals);

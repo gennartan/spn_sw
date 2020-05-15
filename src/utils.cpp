@@ -1,6 +1,8 @@
 #include <math.h>
 #include <stdlib.h>
 #include <stdio.h>
+#include <string>
+
 #include "posit.h"
 
 #include "utils.h"
@@ -10,9 +12,36 @@ void print_err(err_t err){
 		printf("Results are out of range for size (%d, %d)\n", err.nBits, err.es);
 	}
 	printf("(%d, %d): Min-Max values are (%lf - %lf) and errors are (%lf - %lf)\n", err.nBits, err.es, err.min_value, err.max_value, err.min_rel_error, err.max_rel_error);
-	// printf("Was out of range : %d\n", err.out_of_range);
-	// printf("Max value : %lf \t Relative Error : %lf\n", err.max_value, err.max_rel_error);
-	// printf("Min value : %lf \t Relative Error : %lf\n", err.min_value, err.min_rel_error);
+	printf("Outdated print_err\n");
+}
+
+void print_err(FILE* f, err_t err){
+	double max_rel_error = err.max_rel_error > 1000 ? INFINITY : err.max_rel_error;
+	double min_rel_error = err.min_rel_error > 1000 ? INFINITY : err.min_rel_error;
+	fprintf(f, "(%d, %d): Min-Max values are (%lf - %lf) and errors are (%lf - %lf)", err.nBits, err.es, err.min_value, err.max_value, min_rel_error, max_rel_error);
+	if(err.out_of_range){
+		fprintf(f, "  Out of range\n");
+	}else{
+		fprintf(f, "\n");
+	}
+}
+
+void print_err(FILE*f, err_t err, fileinfo_t fileinfo, int is_posit){
+	fprintf(f, "%s %s %d %d %d ",
+				fileinfo.dir.c_str(),
+				fileinfo.filename.c_str(),
+				fileinfo.nNodes,
+				fileinfo.nMult,
+				fileinfo.nAdd);
+
+	double max_rel_error = err.max_rel_error > 1000 ? INFINITY : err.max_rel_error;
+	double min_rel_error = err.min_rel_error > 1000 ? INFINITY : err.min_rel_error;
+	fprintf(f, "%d %d %d %lf %lf\n",
+				is_posit,
+				err.nBits,
+				err.es,
+				min_rel_error,
+				max_rel_error);
 }
 
 err_t err_init(num_size_t size){
@@ -132,6 +161,45 @@ double Posit_err::compute_period(num_size_t size){
 }
 
 
+utilization_t Posit_err::adder_utilization(num_size_t size){
+	utilization_t ut;
+
+	if(size.nBits==8){
+		ut.nLUT = 162;
+	}else if(size.nBits==16){
+		ut.nLUT = 466;
+	}else if(size.nBits==32){
+		ut.nLUT = 1160;
+		ut.nMUXFX = 4;
+	}else{
+		printf("Unknown number of bits");
+		exit(-1);
+	}
+
+	return ut;
+}
+
+utilization_t Posit_err::multiplier_utilization(num_size_t size){
+	utilization_t ut;
+
+	if(size.nBits==8){
+		ut.nLUT = 187;
+	}else if(size.nBits==16){
+		ut.nLUT = 407;
+		ut.nMULT = 1;
+	}else if(size.nBits==32){
+		ut.nLUT = 1027;
+		ut.nMULT = 4;
+	}else{
+		printf("Unknown number of bits");
+		exit(-1);
+	}
+
+	return ut;
+}
+
+
+
 // =============================================================================
 // Floating point ==============================================================
 // =============================================================================
@@ -238,4 +306,16 @@ double Float_err::multiplier_area(num_size_t size){
 double Float_err::compute_period(num_size_t size){
 	printf("computer_period not implemented yet\n");
 	return 0;
+}
+
+utilization_t Float_err::adder_utilization(num_size_t size){
+	utilization_t ut;
+	printf("adder_utilization not implemented yet\n");
+	return ut;
+}
+
+utilization_t Float_err::multiplier_utilization(num_size_t size){
+	utilization_t ut;
+	printf("multiplier_utilization not implemented yet\n");
+	return ut;
 }

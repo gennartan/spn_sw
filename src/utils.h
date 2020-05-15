@@ -16,15 +16,24 @@ typedef struct err_t_struct{
 	int out_of_range = 0;
 } err_t;
 
-typedef struct cost_t_struct{
-	num_size_t size;
-	double max_node_numbers; // A node is a sum or a product
-	double multiplier_speed; // min period to run on FPGA
-	double min_rel_error, max_rel_error; // relative error
-} cost_t;
+typedef struct utilization_t_struct{
+	int nLUT = 0;
+	int nMULT = 0;
+	int nMUXFX = 0;
+} utilization_t;
+
+typedef struct fileinfo_t_struct{
+	std::string dir;
+	std::string filename;
+	int nNodes;
+	int nMult;
+	int nAdd;
+}fileinfo_t;
 
 
 void print_err(err_t err);
+void print_err(FILE* f, err_t err);
+void print_err(FILE*f, err_t err, fileinfo_t fileinfo, int is_posit);
 err_t err_init(num_size_t size);
 void err_set(err_t* error, double max_val, double min_val, double max_err, double min_err);
 
@@ -42,6 +51,9 @@ public:
 	// Area - Hardware size
 	virtual double adder_area(num_size_t size) = 0;
 	virtual double multiplier_area(num_size_t size) = 0;
+
+	virtual utilization_t adder_utilization(num_size_t size) = 0;
+	virtual utilization_t multiplier_utilization(num_size_t size) = 0;
 
 	// Speed - Hardware/software timing
 	virtual double compute_period(num_size_t size) = 0;
@@ -62,6 +74,9 @@ class Posit_err : public Number_representation{
 	virtual double adder_area(num_size_t size);
 	virtual double multiplier_area(num_size_t size);
 
+	virtual utilization_t adder_utilization(num_size_t size);
+	virtual utilization_t multiplier_utilization(num_size_t size);
+
 	// Speed - Hardware/software timing
 	virtual double compute_period(num_size_t size);
 };
@@ -80,6 +95,10 @@ class Float_err : public Number_representation{
 	// Area - Hardware size
 	virtual double adder_area(num_size_t size);
 	virtual double multiplier_area(num_size_t size);
+
+
+	virtual utilization_t adder_utilization(num_size_t size);
+	virtual utilization_t multiplier_utilization(num_size_t size);
 
 	// Speed - Hardware/software timing
 	virtual double compute_period(num_size_t size);
