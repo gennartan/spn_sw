@@ -7,10 +7,65 @@
 
 using namespace std;
 
+int complete_analysis(int argc, char* argv[]);
+int simple_analysis(int argc, char* argv[]);
 std::string pathAppend(const std::string& p1, const std::string& p2);
 int analyse_spn(SPN* spn, FILE *f, fileinfo_t fileinfo);
 
+
 int main(int argc, char*argv[]){
+	return simple_analysis(argc, argv);
+}
+
+int simple_analysis(int argc, char* argv[]){
+
+	char *in_filename, *out_filename;
+	if(argc == 3){
+		in_filename = argv[1];
+		out_filename = argv[2];
+	}else if(argc == 2){
+		in_filename = argv[1];
+		out_filename = NULL;
+	}else{
+		cout << "Usage : ./exe filename.spn outfile.txt" << endl;
+		const char *default_name = "example/example_03.spn";
+		in_filename = (char*) default_name;
+		out_filename = NULL;
+	}
+
+	FILE *f;
+	if(out_filename == NULL){
+		f = stdout;
+	}else{
+		f = fopen((const char*)out_filename, "w");
+	}
+	if(f==NULL){
+		cerr << "Cannot open file! : " << out_filename <<endl;
+		exit(0);
+	}
+
+
+	SPN spn = SPN(in_filename);
+	printf("%s\n", in_filename);
+
+	fileinfo_t fileinfo;
+	fileinfo.dir = "None";
+	fileinfo.filename = in_filename;
+	fileinfo.nNodes = spn.n_node;
+	fileinfo.nMult = spn.n_multiplier;
+	fileinfo.nAdd = spn.n_adder;
+
+	analyse_spn(&spn, f, fileinfo);
+
+
+	if(f!=stdout){
+		fclose(f);
+	}
+	return 0;
+}
+
+
+int complete_analysis(int argc, char* argv[]){
 	// =========================================================================
 	// INPUT DATA
 	// =========================================================================
@@ -71,6 +126,7 @@ int main(int argc, char*argv[]){
 
 	return 0;
 }
+
 
 std::string pathAppend(const std::string& p1, const std::string& p2){
    char sep = '/';

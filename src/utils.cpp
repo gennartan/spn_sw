@@ -256,13 +256,8 @@ err_t Float_err::multiplication_error(num_size_t size, err_t f1, err_t f2){
 	}else{
 		rel_error_bound_min = (accumulated_error)*(1+new_error) - 1;
 	}
-
-	//if(min_val == 0 && max_val != 0){
-	//	printf("EROROROROROROR\n");
-	//}
 	res.out_of_range =f1.out_of_range||f2.out_of_range||new_error_f.out_of_range;
 
-	// printf("Multiplication val / error == %lf / %lf\n", max_val, rel_error_bound);
 	err_set(&res, max_val, min_val, rel_error_bound, rel_error_bound_min);
 	return res;
 }
@@ -288,7 +283,6 @@ err_t Float_err::addition_error(num_size_t size, err_t f1, err_t f2){
 	new_error = this->encoding_error(size, min_val).min_rel_error;
 	double rel_error_bound_min = (1+accumulated_error)*(1+new_error) - 1;
 
-	// printf("Addition val / error == %lf / %lf\n", max_val, rel_error_bound);
 	err_set(&res, max_val, min_val, rel_error_bound, rel_error_bound_min);
 	return res;
 }
