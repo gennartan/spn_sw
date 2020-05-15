@@ -7,11 +7,64 @@
 
 using namespace std;
 
+int complete_analysis(int argc, char* argv[]);
 std::string pathAppend(const std::string& p1, const std::string& p2);
 int analyse_spn(SPN* spn, FILE *f, fileinfo_t fileinfo);
 
+// #define COMPLETE_ANALYSIS
+
 int main(int argc, char*argv[]){
-	// =========================================================================
+#ifdef COMPLETE_ANALYSIS
+	return complete_analysis(argc, argv);
+#else
+
+	char *in_filename, *out_filename;
+	if(argc == 3){
+		in_filename = argv[1];
+		out_filename = argv[2];
+	}else if(argc == 2){
+		in_filename = argv[1];
+		out_filename = NULL;
+	}else{
+		cout << "Usage : ./exe filename.spn outfile.txt" << endl;
+		const char *default_name = "example/example_03.spn";
+		in_filename = (char*) default_name;
+		out_filename = NULL;
+	}
+
+	FILE *f;
+	if(out_filename == NULL){
+		f = stdout;
+	}else{
+		f = fopen((const char*)out_filename, "w");
+	}
+	if(f==NULL){
+		cerr << "Cannot open file! : " << out_filename <<endl;
+		exit(0);
+	}
+
+
+	SPN spn = SPN(in_filename);
+	printf("%s\n", in_filename);
+
+	fileinfo_t fileinfo;
+	fileinfo.dir = "None";
+	fileinfo.filename = "None";
+	fileinfo.nNodes = spn.n_node;
+	fileinfo.nMult = spn.n_multiplier;
+	fileinfo.nAdd = spn.n_adder;
+
+	analyse_spn(&spn, f, fileinfo);
+
+	if(f!=stdout){
+		fclose(f);
+	}
+	return 0;
+#endif
+}
+
+int complete_analysis(int argc, char* argv[]){
+		// =========================================================================
 	// INPUT DATA
 	// =========================================================================
 	std::string base_path = "/home/gennart/Documents/MAI/Thesis/nshah/spn";
@@ -350,8 +403,8 @@ int analyse_spn(SPN* spn, FILE *f, fileinfo_t fileinfo){
 
 	for(list<int>::iterator nb=nbits_posit_list.begin(); nb!=nbits_posit_list.end(); nb++){
 		err_t best_error;
-		best_error.max_rel_error = INFINITY;
-		best_error.min_rel_error = INFINITY;
+		best_error.err_exp_max = 0;
+		best_error.err_exp_min = 0;
 		best_error.out_of_range = 1;
 
 		for(list<int>::iterator es=es_posit_list.begin(); es!=es_posit_list.end(); es++){
@@ -363,7 +416,8 @@ int analyse_spn(SPN* spn, FILE *f, fileinfo_t fileinfo){
 			posit_size.es = *es;
 
 			err_t curr_err = spn->compute_err(&Posit_repr, posit_size);
-			if((curr_err.max_rel_error < best_error.max_rel_error && curr_err.out_of_range==0) || best_error.out_of_range==1){
+			// print_err(curr_err);
+			if((curr_err.err_exp_max > best_error.err_exp_max && curr_err.out_of_range==0) || best_error.out_of_range==1){
 				best_error = curr_err;
 			}
 		}
@@ -384,8 +438,8 @@ int analyse_spn(SPN* spn, FILE *f, fileinfo_t fileinfo){
 
 	for(list<int>::iterator nb=nbits_float_list.begin(); nb!=nbits_float_list.end(); nb++){
 		err_t best_error;
-		best_error.max_rel_error = INFINITY;
-		best_error.min_rel_error = INFINITY;
+		best_error.err_exp_max = 0;
+		best_error.err_exp_max = 0;
 		best_error.out_of_range = 1; // best error not set yet
 
 		for(list<int>::iterator es=es_float_list.begin(); es!=es_float_list.end(); es++){
@@ -397,7 +451,7 @@ int analyse_spn(SPN* spn, FILE *f, fileinfo_t fileinfo){
 
 
 			err_t curr_err = spn->compute_err(&Float_repr, float_size);
-			if((curr_err.max_rel_error < best_error.max_rel_error && curr_err.out_of_range==0) || best_error.out_of_range==1){
+			if((curr_err.err_exp_max > best_error.err_exp_max && curr_err.out_of_range==0) || best_error.out_of_range==1){
 				best_error = curr_err;
 			}
 		}

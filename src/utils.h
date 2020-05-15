@@ -12,8 +12,8 @@ typedef struct err_t_struct{
 	int nBits = 0;
 	int es = 0;
 	double max_value=0, min_value=0;
-	double max_rel_error=0, min_rel_error=0;
-	int out_of_range = 0;
+	int err_exp_min=0, err_exp_max =0;
+	int out_of_range=0;
 } err_t;
 
 typedef struct utilization_t_struct{
@@ -35,7 +35,7 @@ void print_err(err_t err);
 void print_err(FILE* f, err_t err);
 void print_err(FILE*f, err_t err, fileinfo_t fileinfo, int is_posit);
 err_t err_init(num_size_t size);
-void err_set(err_t* error, double max_val, double min_val, double max_err, double min_err);
+void err_set(err_t* error, double min_val, double max_val, int min_err_exp, int max_err_exp);
 
 // =============================================================================
 // General interface for number representations ================================
