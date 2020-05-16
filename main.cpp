@@ -417,7 +417,7 @@ int analyse_spn(SPN* spn, FILE *f, fileinfo_t fileinfo){
 
 			err_t curr_err = spn->compute_err(&Posit_repr, posit_size);
 			// print_err(curr_err);
-			if((curr_err.err_exp_max > best_error.err_exp_max && curr_err.out_of_range==0) || best_error.out_of_range==1){
+			if((curr_err.err_exp_max < best_error.err_exp_max && curr_err.out_of_range==0) || best_error.out_of_range==1){
 				best_error = curr_err;
 			}
 		}
@@ -451,7 +451,7 @@ int analyse_spn(SPN* spn, FILE *f, fileinfo_t fileinfo){
 
 
 			err_t curr_err = spn->compute_err(&Float_repr, float_size);
-			if((curr_err.err_exp_max > best_error.err_exp_max && curr_err.out_of_range==0) || best_error.out_of_range==1){
+			if((curr_err.err_exp_max < best_error.err_exp_max && curr_err.out_of_range==0) || best_error.out_of_range==1){
 				best_error = curr_err;
 			}
 		}

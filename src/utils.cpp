@@ -11,11 +11,11 @@ void print_err(err_t err){
 	if(err.out_of_range){
 		printf("Results are out of range for size (%d, %d)\n", err.nBits, err.es);
 	}
-	printf("(%d, %d): Min-Max values are (%lf - %lf) and errors are (2^-%d - 2^-%d)\n", err.nBits, err.es, err.min_value, err.max_value, err.err_exp_min, err.err_exp_max);
+	printf("(%d, %d): Min-Max values are (%lf - %lf) and errors are (2^%d - 2^%d)\n", err.nBits, err.es, err.min_value, err.max_value, err.err_exp_min, err.err_exp_max);
 }
 
 void print_err(FILE* f, err_t err){
-	fprintf(f, "(%d, %d): Min-Max values are (%lf - %lf) and errors are (2^-%d - 2^-%d)", err.nBits, err.es, err.min_value, err.max_value, err.err_exp_min, err.err_exp_max);
+	fprintf(f, "(%d, %d): Min-Max values are (%lf - %lf) and errors are (2^%d - 2^%d)", err.nBits, err.es, err.min_value, err.max_value, err.err_exp_min, err.err_exp_max);
 	if(err.out_of_range){
 		fprintf(f, "  Out of range\n");
 	}else{
@@ -31,7 +31,7 @@ void print_err(FILE*f, err_t err, fileinfo_t fileinfo, int is_posit){
 				fileinfo.nMult,
 				fileinfo.nAdd);
 
-	fprintf(f, "%d %d %d 2^-%d 2^-%d\n",
+	fprintf(f, "%d %d %d 2^%d 2^%d\n",
 				is_posit,
 				err.nBits,
 				err.es,
@@ -66,7 +66,7 @@ err_t Posit_err::encoding_error(num_size_t size, double val){
 	if(val == 0){
 		err_exp = 0;
 	}else{
-		err_exp = pos.fs() + 1;
+		err_exp = -(pos.fs() + 1);
 	}
 
 	double useed = pow(2, pow(2, size.es));
@@ -198,7 +198,7 @@ err_t Float_err::encoding_error(num_size_t size, double val){
 	if(val==0){
 		err_exp = 0;
 	}else{
-		err_exp = res.nBits-res.es+1;
+		err_exp = -(res.nBits-res.es+1);
 	}
 
 	double max_exp = pow(2, pow(2, size.es-1)-1);
