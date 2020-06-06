@@ -34,9 +34,9 @@ void print_err(FILE*f, err_t err, fileinfo_t fileinfo, int is_posit){
 				fileinfo.nMult,
 				fileinfo.nAdd);
 
-	double max_rel_error = err.max_rel_error > 1000 ? INFINITY : err.max_rel_error;
-	double min_rel_error = err.min_rel_error > 1000 ? INFINITY : err.min_rel_error;
-	fprintf(f, "%d %d %d %lf %lf\n",
+	double max_rel_error = (err.max_rel_error > 1000 || err.out_of_range==1) ? INFINITY : err.max_rel_error;
+	double min_rel_error = (err.min_rel_error > 1000 || err.out_of_range==1) ? INFINITY : err.min_rel_error;
+	fprintf(f, "%d %d %d %lf %lf ",
 				is_posit,
 				err.nBits,
 				err.es,
@@ -84,6 +84,8 @@ err_t Posit_err::encoding_error(num_size_t size, double val){
 			rel_error = 1;
 			res.out_of_range = 1;
 		}
+	}else{
+		res.out_of_range = 0;
 	}
 
 	err_set(&res, val, val, rel_error, rel_error);
@@ -105,10 +107,11 @@ err_t Posit_err::multiplication_error(num_size_t size, err_t pos1, err_t pos2){
 	accumulated_error = (1+pos1.min_rel_error)*(1+pos2.min_rel_error);
 	double rel_error_bound_min;
 	if(min_val==0){
-		rel_error_bound_min = 0;
+		rel_error_bound_min = accumulated_error - 1;
 	}else{
 		rel_error_bound_min = accumulated_error*(1+new_error) - 1;
 	}
+
 
 	res.out_of_range = pos1.out_of_range||pos2.out_of_range||new_error_p.out_of_range;
 
@@ -137,6 +140,9 @@ err_t Posit_err::addition_error(num_size_t size, err_t pos1, err_t pos2){
 	}
 
 	new_error_p = this->encoding_error(size, min_val);
+	if(min_val==0){
+		new_error_p.min_rel_error = fmax(pos1.min_rel_error, pos2.min_rel_error);
+	}
 	res.out_of_range = res.out_of_range || new_error_p.out_of_range;
 	new_error = new_error_p.min_rel_error;
 	double rel_error_bound_min = (1+accumulated_error)*(1+new_error) - 1;
@@ -252,7 +258,7 @@ err_t Float_err::multiplication_error(num_size_t size, err_t f1, err_t f2){
 	new_error = new_error_f.min_rel_error;
 	double rel_error_bound_min;
 	if(min_val==0){
-		rel_error_bound_min = 0;
+		rel_error_bound_min = accumulated_error-1;
 	}else{
 		rel_error_bound_min = (accumulated_error)*(1+new_error) - 1;
 	}
@@ -261,6 +267,7 @@ err_t Float_err::multiplication_error(num_size_t size, err_t f1, err_t f2){
 	err_set(&res, max_val, min_val, rel_error_bound, rel_error_bound_min);
 	return res;
 }
+
 err_t Float_err::addition_error(num_size_t size, err_t f1, err_t f2){
 	err_t res = err_init(size);
 	double max_val = f1.max_value + f2.max_value;
@@ -281,6 +288,9 @@ err_t Float_err::addition_error(num_size_t size, err_t f1, err_t f2){
 		res.out_of_range = f2.out_of_range;
 	}
 	new_error = this->encoding_error(size, min_val).min_rel_error;
+	if(min_val == 0){
+		new_error = fmax(f1.min_rel_error, f2.min_rel_error);
+	}
 	double rel_error_bound_min = (1+accumulated_error)*(1+new_error) - 1;
 
 	err_set(&res, max_val, min_val, rel_error_bound, rel_error_bound_min);

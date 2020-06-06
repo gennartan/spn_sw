@@ -150,6 +150,7 @@ Posit Node::compute_real_posit(int **literals, int n_lit, num_size_t size){
 				result = result + this->children[i]->compute_real_posit(literals, n_lit, size);
 			}
 			// cout << "Intermediate sum result " << result << endl;
+			// printf("Node type: S \t"); printf("id: %d\n",this->id); result.print();
 			return result;
 		}
 		break;
@@ -159,6 +160,7 @@ Posit Node::compute_real_posit(int **literals, int n_lit, num_size_t size){
 			for(int i=0;i<this->n_children;i++){
 				result = result * this->children[i]->compute_real_posit(literals, n_lit, size);
 			}
+			// printf("Node type: P \t"); printf("id: %d\n",this->id); result.print();
 			return result;
 		}
 		break;
@@ -167,6 +169,7 @@ Posit Node::compute_real_posit(int **literals, int n_lit, num_size_t size){
 			Posit weight = Posit(size.nBits+1, size.es);
 			weight.set(this->weight);
 			result = weight * this->children[0]->compute_real_posit(literals, n_lit, size);
+			// printf("Node type: W \t"); printf("id: %d\n",this->id); result.print();
 			return result;
 		}
 		break;
@@ -178,6 +181,7 @@ Posit Node::compute_real_posit(int **literals, int n_lit, num_size_t size){
 			// cout << "Integer value: " << literals[nbr-1][sign] << endl;
 			result.set(static_cast<double>(literals[nbr-1][sign]));
 			// cout << "Intermediate literal result " << result << endl;
+			// printf("Node type: L \t"); printf("id: %d\n",this->id); result.print();
 			return result;
 		}
 		break;
