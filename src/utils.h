@@ -11,8 +11,8 @@ typedef struct num_size_t_struct{
 typedef struct err_t_struct{
 	int nBits = 0;
 	int es = 0;
-	double max_value=0, min_value=0;
-	double max_rel_error=0, min_rel_error=0;
+	double max_value=0.0, min_value=0.0;
+	double max_rel_error=0.0, min_rel_error=0.0;
 	int out_of_range = 0;
 } err_t;
 

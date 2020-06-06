@@ -3,6 +3,7 @@
 #include <iostream>
 #include <string>
 #include <list>
+#include <math.h>
 #include "spn.h"
 
 using namespace std;
@@ -11,11 +12,119 @@ int complete_analysis(int argc, char* argv[]);
 int simple_analysis(int argc, char* argv[]);
 std::string pathAppend(const std::string& p1, const std::string& p2);
 int analyse_spn(SPN* spn, FILE *f, fileinfo_t fileinfo);
-
+int get_results_from_file(FILE *outfile, SPN* spn, FILE *in_file);
+int get_diffs(FILE* outfile, SPN* spn, FILE* double_float, FILE* posit);
 
 int main(int argc, char*argv[]){
+
+
+	// FILE *double_float, *posit, *outfile;
+	// posit = fopen("../result/result_msnbc_posit_0-0.txt", "r");
+	// if(posit==NULL){
+	// 	fprintf(stderr, "Posit file does not exist\n");
+	// 	exit(-1);
+	// }
+	// double_float = fopen("../result/result_msnbc_exact_0-0.txt", "r");
+	// if(double_float==NULL){
+	// 	fprintf(stderr, "Double float file does not exist\n");
+	// 	exit(-1);
+	// }
+
+	// SPN spn = SPN("example/msnbc_0-0.spn");
+	// get_diffs(stdout, &spn, double_float, posit);
+
+	// return 0;
+
+
+	// FILE *infile, *outfile;
+	// infile = fopen("../dataset/dataset_msnbc_0-0.txt", "r");
+	// if(infile==NULL){
+	// 	fprintf(stderr, "Cannot open input file \n");
+	// 	exit(-1);
+	// }
+	// outfile = fopen("../result/result_msnbc_exact_0-0.txt", "w");
+	// if(outfile==NULL){
+	// 	fprintf(stderr, "Cannot open output file\n");
+	// 	exit(-1);
+	// }
+
+	// SPN spn = SPN("example/msnbc_0-0.spn");
+
+	// get_results_from_file(outfile, &spn, infile);
+
+	// fclose(infile);
+	// fclose(outfile);
+
+
 	return simple_analysis(argc, argv);
+	return complete_analysis(argc, argv);
 }
+
+int get_diffs(FILE* outfile, SPN* spn, FILE* double_float, FILE* posit){
+	double max_rel_error = 0;
+	double mean_rel_error = 0;
+
+	int double_exp, posit_exp;
+	double double_mant, posit_mant;
+
+	int exp;
+	double mant;
+	for(int i=0;i<50000;i++){
+		fscanf(double_float, "%lf *2^ %d\n",  &double_mant, &double_exp);
+		fscanf(posit, "%lf *2^ %d\n",  &posit_mant, &posit_exp);
+
+		double myDouble = ldexp(double_mant, double_exp);
+		double myPosit = ldexp(posit_mant, posit_exp);
+
+		double rel_error = fabs((myPosit/myDouble)-1.0);
+		mean_rel_error += rel_error;
+
+		max_rel_error = fmax(max_rel_error, rel_error);
+		if(max_rel_error==rel_error){
+			mant = frexp(rel_error, &exp);
+		}
+	}
+	mean_rel_error /= 50000;
+	double mmant; int mexp;
+	mmant = frexp(mean_rel_error, &mexp);
+
+	fprintf(outfile, "%lf *2^ %d\n", mant, exp);
+	fprintf(outfile, "%lf *2^ %d\n", mmant, mexp);
+	return 0;
+}
+
+int get_results_from_file(FILE *outfile, SPN* spn, FILE *infile){
+	/* The input files comes from
+	<https://github.com/UCLA-StarAI/Density-Estimation-Datasets/>
+	*/
+	int **literals = spn->create_literals();
+	double result = 0.0, mantissa;
+	int exp;
+
+
+	int curr_lit = 0;
+	while(!feof(infile)){
+		for(int i=0;i<spn->n_lit;i++){
+			fscanf(infile, "%d,", &curr_lit);
+			literals[i][0] = curr_lit==0 ? 0 : 1;
+			literals[i][1] = curr_lit==0 ? 1 : 0;
+		}
+
+		num_size_t size;
+		size.nBits = 16;
+		size.es = 4;
+		// Posit value = spn->compute_real_posit(literals, size);
+		double value = spn->compute_exact(literals);
+		// result = value.getDouble();
+		result = value;
+		mantissa = frexp(result, &exp);
+		fprintf(outfile, "%lf *2^ %d\n", mantissa, exp);
+	}
+
+
+	return 0;
+}
+
 
 int simple_analysis(int argc, char* argv[]){
 
@@ -46,7 +155,23 @@ int simple_analysis(int argc, char* argv[]){
 
 
 	SPN spn = SPN(in_filename);
-	printf("%s\n", in_filename);
+	fprintf(f, "Input filename: %s\n", in_filename);
+	fprintf(f, "Output format : \n");
+	fprintf(f, "Directory Filename nNodes nMult nAdd "
+				"[isPosit nBits es min_err max_err] "
+				"[isPosit nBits es min_err max_err]\n");
+
+	int **literals = spn.create_literals();
+	for(int i=0;i<spn.n_lit;i++){
+		literals[i][0] = 1;
+		literals[i][1] = 1;
+	}
+	num_size_t posit_size;
+	posit_size.nBits = 16;
+	posit_size.es = 4;
+	Posit number = spn.compute_real_posit(literals, posit_size);
+	// printf("Value : %lf\n", number.getDouble());
+	// number.print();
 
 	fileinfo_t fileinfo;
 	fileinfo.dir = "None";
@@ -82,12 +207,17 @@ int complete_analysis(int argc, char* argv[]){
 	// =========================================================================
 	// OUTPUT DATA
 	// =========================================================================
-	const char* out_filename = "stats.csv";
+	const char* out_filename = "stats_3.csv";
 	FILE* f = fopen(out_filename, "w");
 	if(f == NULL){
 		fprintf(stderr, "Cannot open file : %s\n", out_filename);
 		exit(-1);
 	}
+
+	fprintf(f, "Output format : \n");
+	fprintf(f, "Directory Filename nNodes nMult nAdd "
+				"[isPosit nBits es min_err max_err] "
+				"[isPosit nBits es min_err max_err]\n");
 
 	// =========================================================================
 	// Long loop
@@ -139,6 +269,97 @@ std::string pathAppend(const std::string& p1, const std::string& p2){
   else
      return(p1 + p2);
 }
+
+
+int analyse_spn(SPN* spn, FILE *f, fileinfo_t fileinfo){
+// =============================================================================
+// Error analysis
+// =============================================================================
+
+	Posit_err Posit_repr;
+	num_size_t posit_size;
+	err_t posit_error;
+
+
+	Float_err Float_repr;
+	num_size_t float_size;
+	err_t float_error;
+
+	int CUSTOM_NBITS[] = {8, 12, 16, 20, 24, 28};
+	int CUSTOM_ES[] = {0, 2, 3, 4, 6, 8, 10, 11};
+
+
+	list<int> nbits_list(CUSTOM_NBITS, CUSTOM_NBITS+sizeof(CUSTOM_NBITS)/sizeof(int));
+	list<int> es_list(CUSTOM_ES, CUSTOM_ES+sizeof(CUSTOM_ES)/sizeof(int));
+
+	for(list<int>::iterator nb=nbits_list.begin(); nb!=nbits_list.end(); nb++){
+		err_t best_error_posit;
+		best_error_posit.max_rel_error = INFINITY;
+		best_error_posit.min_rel_error = INFINITY;
+		best_error_posit.out_of_range = 1;
+		err_t best_error_float;
+		best_error_float.max_rel_error = INFINITY;
+		best_error_float.min_rel_error = INFINITY;
+		best_error_float.out_of_range = 1;
+
+
+		// Find best exponent for posit
+		for(list<int>::iterator es=es_list.begin(); es!=es_list.end(); es++){
+			if(*es > *nb){
+				break;
+			}
+
+			posit_size.nBits = *nb;
+			posit_size.es = *es;
+
+			err_t curr_err = spn->compute_err(&Posit_repr, posit_size);
+			if((curr_err.min_rel_error < best_error_posit.min_rel_error && curr_err.out_of_range==0) || best_error_posit.out_of_range==1){
+				best_error_posit = curr_err;
+			}
+		}
+
+		// Find best exponent for float
+		for(list<int>::iterator es=es_list.begin(); es!=es_list.end(); es++){
+			if(*es > *nb){
+				break;
+			}
+
+			float_size.nBits = *nb;
+			float_size.es = *es;
+
+			err_t curr_err = spn->compute_err(&Float_repr, float_size);
+			if((curr_err.max_rel_error < best_error_float.max_rel_error && curr_err.out_of_range==0) || best_error_float.out_of_range==1){
+				best_error_float = curr_err;
+			}
+		}
+
+
+
+		// fprintf(f, "Min val posit : %lf \t %d\n", best_error_posit.min_value, best_error_posit.min_value==0);
+		// fprintf(f, "Min val float : %lf \t %dp\n", best_error_float.min_value, best_error_float.min_value==0);
+		print_err(f, best_error_posit, fileinfo, 1);
+		print_err(f, best_error_float, fileinfo, 0);
+		fprintf(f, "\n");
+	}
+
+	return 0;
+}
+
+
+// int tight_posit_spn(SPN* spn, num_size_t size){
+
+// 	int **literals = spn->create_literals();
+// 	for(int i=0;i<spn->n_lit;i++){
+// 		int j = rand() % 3;
+// 		literals[i][0] = j >= 1 ? 1 : 0;
+// 		literals[i][1] = j != 1 ? 0 : 1;
+// 	}
+
+// 	Posit pos = spn->compute_real_posit(literals, size);
+// 	myFloat flo = spn->compute_real_float(literals, size);
+
+
+// }
 
 // int main(int argc, char* argv[]){
 
@@ -354,117 +575,3 @@ std::string pathAppend(const std::string& p1, const std::string& p2){
 
 // 	return 0;
 // }
-
-int analyse_spn(SPN* spn, FILE *f, fileinfo_t fileinfo){
-// =============================================================================
-// Error analysis
-// =============================================================================
-
-	// fprintf(f, "===========================================================\n");
-	// fprintf(f, "Typical POSIT size error bound:\n");
-	// fprintf(f, "===========================================================\n");
-	Posit_err Posit_repr;
-	num_size_t posit_size;
-	err_t posit_error;
-
-	// int NBITS_POSIT[] = {8, 16, 31};
-	// int ES_POSIT[] = {0, 1 ,2};
-
-	// for(int i=0;i<3;i++){
-	// 	posit_size.nBits = NBITS_POSIT[i];
-	// 	posit_size.es = ES_POSIT[i];
-	// 	posit_error = spn->compute_err(&Posit_repr, posit_size);
-	// 	print_err(f, posit_error);
-	// }
-
-	// fprintf(f, "===========================================================\n");
-	// fprintf(f, "Typical FLOAT size error bound:\n");
-	// fprintf(f, "===========================================================\n");
-	Float_err Float_repr;
-	num_size_t float_size;
-	err_t float_error;
-
-	// int NBITS_FLOAT[] = {8, 16, 32, 64};
-	// int ES_FLOAT[] = {4, 5, 8, 11};
-
-	// for(int i=0;i<4;i++){
-	// 	float_size.nBits = NBITS_FLOAT[i];
-	// 	float_size.es = ES_FLOAT[i];
-	// 	float_error = spn->compute_err(&Float_repr, float_size);
-	// 	print_err(f, float_error);
-	// }
-
-	// fprintf(f, "===========================================================\n");
-	// fprintf(f, "Custom POSIT size error bound:\n");
-	// fprintf(f, "===========================================================\n");
-	int CUSTOM_NBITS_POSIT[] = {8, 12, 16, 20, 24, 28, 31};
-	int CUSTOM_ES_POSIT[] = {0, 2, 4, 6, 8, 10, 11};
-
-
-	list<int> nbits_posit_list(CUSTOM_NBITS_POSIT, CUSTOM_NBITS_POSIT+sizeof(CUSTOM_NBITS_POSIT)/sizeof(int));
-	list<int> es_posit_list(CUSTOM_ES_POSIT, CUSTOM_ES_POSIT+sizeof(CUSTOM_ES_POSIT)/sizeof(int));
-
-	for(list<int>::iterator nb=nbits_posit_list.begin(); nb!=nbits_posit_list.end(); nb++){
-		err_t best_error;
-		best_error.max_rel_error = INFINITY;
-		best_error.min_rel_error = INFINITY;
-		best_error.out_of_range = 1;
-
-		for(list<int>::iterator es=es_posit_list.begin(); es!=es_posit_list.end(); es++){
-			if(*es > *nb){
-				break;
-			}
-
-			posit_size.nBits = *nb;
-			posit_size.es = *es;
-
-			err_t curr_err = spn->compute_err(&Posit_repr, posit_size);
-			if((curr_err.max_rel_error < best_error.max_rel_error && curr_err.out_of_range==0) || best_error.out_of_range==1){
-				best_error = curr_err;
-			}
-		}
-
-
-		print_err(f, best_error, fileinfo, 1);
-	}
-
-
-	// fprintf(f, "===========================================================\n");
-	// fprintf(f, "Custom FLOAT size error bound:\n");
-	// fprintf(f, "===========================================================\n");
-	int CUSTOM_NBITS_FLOAT[] = {8, 12, 16, 20, 24, 28, 31};
-	int CUSTOM_ES_FLOAT[] = {0, 2, 4, 6, 8, 10, 11};
-
-	list<int> nbits_float_list(CUSTOM_NBITS_FLOAT, CUSTOM_NBITS_FLOAT+sizeof(CUSTOM_NBITS_FLOAT)/sizeof(int));
-	list<int> es_float_list(CUSTOM_ES_FLOAT, CUSTOM_ES_FLOAT+sizeof(CUSTOM_ES_FLOAT)/sizeof(int));
-
-	for(list<int>::iterator nb=nbits_float_list.begin(); nb!=nbits_float_list.end(); nb++){
-		err_t best_error;
-		best_error.max_rel_error = INFINITY;
-		best_error.min_rel_error = INFINITY;
-		best_error.out_of_range = 1; // best error not set yet
-
-		for(list<int>::iterator es=es_float_list.begin(); es!=es_float_list.end(); es++){
-			if(*es > *nb){
-				break;
-			}
-			float_size.nBits = *nb;
-			float_size.es = *es;
-
-
-			err_t curr_err = spn->compute_err(&Float_repr, float_size);
-			if((curr_err.max_rel_error < best_error.max_rel_error && curr_err.out_of_range==0) || best_error.out_of_range==1){
-				best_error = curr_err;
-			}
-		}
-
-		print_err(f, best_error, fileinfo, 0);
-	}
-
-
-// =============================================================================
-// Utilization analysis
-// =============================================================================
-
-	return 0;
-}
